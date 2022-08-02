@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	{% for i in tweets %}
+	<h1> title: {{ tweets[i]['title'] }}</h1>
+	<h2> text: {{ tweets[i]['text'] }}</h2>
+	<h3> image link: {{ tweets[i]['imagelink'] }}</h3>
+	{%endfor%}
+	<a href="add_tweet"> Add Tweet</a>
+</body>
+</html>

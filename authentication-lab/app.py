@@ -12,13 +12,11 @@ config= {
   "messagingSenderId": "304837708877",
   "appId": "1:304837708877:web:9bf36b3851550923a7a004",
   "measurementId": "G-QZN6JHME5E",
-  "databaseURL":""
+  "databaseURL":"https://y2-summer-firstproject-default-rtdb.europe-west1.firebasedatabase.app/"
 }
 firebase= pyrebase.initialize_app(config)
 auth= firebase.auth()
-
-
-
+db= firebase.database()
 
 @app.route('/', methods=['GET', 'POST'])
 def signup():
@@ -28,6 +26,13 @@ def signup():
 		password=request.form['password']
 		try:
 			login_session['user']= auth.create_user_with_email_and_password(email,password)
+			user={"email": request.form['email'],
+			"password": request.form['password'],
+			"username": request.form['username'],
+			"fullname": request.form['fullname'],
+			"bio": request.form['bio']
+			}
+			db.child("Users").child(login_session['user']['localId']).set(user)
 			return redirect(url_for('add_tweet'))
 		except:
 			error="Authentication Failed"
@@ -42,7 +47,7 @@ def signin():
 		email = request.form['email']
 		password = request.form['password']
 		try:
-			login_session['user'] = auth.sign_in_user_with_email_and_password(email, password)
+			login_session['user'] = auth.sign_in_with_email_and_password(email, password)
 			return redirect(url_for('add_tweet'))
 		except:
 		   error = "Authentication failed"
@@ -53,7 +58,28 @@ def signin():
 
 @app.route('/add_tweet', methods=['GET', 'POST'])
 def add_tweet():
+	error= ""
+	if request.method=="POST":
+		# try:
+		tweet={"title": request.form['title'],
+		"text": request.form['text'],
+		"imagelink": request.form['imagelink'],
+		"uid": login_session['user']['localId']}
+		db.child("Tweets").push(tweet)
+		return redirect(url_for('all_tweets'))
+		# except:
+		# 	print("couldn't add tweet")
 	return render_template("add_tweet.html")
+
+
+
+@app.route('/tweets', methods=['GET', 'POST'])
+def all_tweets():
+	tweets= db.child('Tweets').get().val()
+	return render_template('tweets.html', tweets=tweets)
+
+# return render_template("tweets.html")
+
 
 
 if __name__ == '__main__':
